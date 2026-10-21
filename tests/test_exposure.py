@@ -1,7 +1,7 @@
-import pandas as pd
+﻿import pandas as pd
 import pytest
 
-from src.exposure import reconcile_exposure, breakdown_exposure
+from riskplatform.exposure import reconcile_exposure, breakdown_exposure
 
 
 def test_reconcile_exposure_matches_stated_values():

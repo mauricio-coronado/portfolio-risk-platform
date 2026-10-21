@@ -1,7 +1,7 @@
-import pandas as pd
+﻿import pandas as pd
 import pytest
 
-from src.risk_metrics import (
+from riskplatform.risk_metrics import (
     calculate_cumulative_return,
     calculate_historical_var,
     calculate_expected_shortfall,

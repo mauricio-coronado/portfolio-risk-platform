@@ -1,7 +1,7 @@
-import pandas as pd
+﻿import pandas as pd
 import pytest
 
-from src.stress import (
+from riskplatform.stress import (
     calculate_equity_selloff_impact,
     calculate_rate_shock_impact,
     calculate_combined_impact,

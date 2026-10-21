@@ -1,4 +1,4 @@
-import pandas as pd
+﻿import pandas as pd
 import numpy as np
 
 
@@ -6,7 +6,7 @@ import numpy as np
 def calculate_equity_selloff_impact(security_master: pd.DataFrame, market_shock: float = -0.15) -> pd.Series:
     """
     Per-security return impact under the Equity selloff scenario:
-    security return = beta × market shock. Non-Equity securities
+    security return = beta Ã— market shock. Non-Equity securities
     get an impact of 0.
 
     Args:
@@ -38,7 +38,7 @@ def calculate_equity_selloff_impact(security_master: pd.DataFrame, market_shock:
 def calculate_rate_shock_impact(security_master: pd.DataFrame, delta_y: float = 0.01) -> pd.Series:
     """
     Per-security return impact under the Rate shock scenario:
-    -Duration × Δy + 0.5 × Convexity × Δy², applied to Bond and Loan
+    -Duration Ã— Î”y + 0.5 Ã— Convexity Ã— Î”yÂ², applied to Bond and Loan
     only. Non-fixed-income securities get an impact of 0.
 
     Args:

@@ -1,4 +1,4 @@
-import pandas as pd
+﻿import pandas as pd
 import numpy as np
 
 
@@ -77,7 +77,7 @@ def calculate_expected_shortfall(returns: pd.Series, confidence_level: float = 0
 
 def calculate_tail_count(returns: pd.Series, confidence_level: float = 0.95) -> int:
     """
-    Number of observations at or beyond the VaR threshold — i.e. the
+    Number of observations at or beyond the VaR threshold â€” i.e. the
     sample size behind calculate_expected_shortfall's average. 
     """
     clean_returns = returns.dropna()

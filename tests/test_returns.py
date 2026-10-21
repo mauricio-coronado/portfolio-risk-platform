@@ -1,8 +1,8 @@
-import pandas as pd
+﻿import pandas as pd
 import numpy as np
 import pytest
 
-from src.returns import (
+from riskplatform.returns import (
     calculate_security_returns,
     calculate_portfolio_returns,
     # calculate_group_cumulative_returns,

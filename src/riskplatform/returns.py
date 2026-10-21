@@ -1,4 +1,4 @@
-import pandas as pd
+﻿import pandas as pd
 import numpy as np
 
 def calculate_security_returns(total_return_index_usd: pd.DataFrame) -> pd.DataFrame:

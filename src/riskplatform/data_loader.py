@@ -1,20 +1,24 @@
-import pandas as pd
+﻿import pandas as pd
 from pathlib import Path
 
-DATA_PATH = Path(__file__).parent.parent / 'data' / 'candidate_data.xlsx'
+DEFAULT_DATA_PATH = Path("data") / "candidate_data.xlsx"
 SHEETS = ['SecurityMaster', 'PortfolioWeights', 'TotalReturnIndex_Local',
           'RawPrice_Local', 'FX_Local_per_USD', 'CorporateActions', 'StressScenarios']
 
 
-def load_inputs() -> dict:
+def load_inputs(path: str | Path | None = None) -> dict:
     """
-    Load all input sheets from the candidate data file.
+    Load all input sheets from the workbook.
+
+    Args:
+        path (str | Path | None): workbook location. Defaults to
+            DEFAULT_DATA_PATH, resolved against the working directory.
 
     Returns:
         dict[str, pd.DataFrame]: one DataFrame per sheet, keyed by sheet name
             (see SHEETS for the exact keys).
     """
-    return pd.read_excel(DATA_PATH, sheet_name=SHEETS)
+    return pd.read_excel(path or DEFAULT_DATA_PATH, sheet_name=SHEETS)
 
 
 def validate_inputs(data: dict) -> None:

@@ -1,6 +1,6 @@
-import pytest
+﻿import pytest
 
-from main import main
+from riskplatform.pipeline import main
 
 
 def test_pipeline_output():

@@ -1,16 +1,16 @@
-import matplotlib.pyplot as plt
+﻿import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import matplotlib.ticker as mticker
 from matplotlib.patches import FancyBboxPatch
 import pandas as pd
 import numpy as np
 
-from src.risk_metrics import (
+from riskplatform.risk_metrics import (
     calculate_cumulative_return, calculate_annualized_volatility,
     calculate_historical_var, calculate_expected_shortfall, calculate_max_drawdown, 
     calculate_tail_count
 )
-from src.exposure import breakdown_exposure
+from riskplatform.exposure import breakdown_exposure
 
 PALETTE = {
     "primary": "#3B5B92",
