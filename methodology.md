@@ -44,8 +44,7 @@ VaR is also backtested in-sample: 27 breaches of the 95% threshold and 6 of the 
 
 ## Production-scaling approach
 
-Source ingestion via APIs into a staged cloud data layer (e.g. GCS/BigQuery), with automated data-quality checks (structural validation, completeness, FX/sensitivity checks, mirroring validate_inputs here) gating promotion to production tables. Code lives in a version-controlled repo (git/GitHub); pipeline changes run through CI (pytest, as in this submission) on every pull request before merge. The notebook here would become an unattended scheduled job rather than something run cell-by-cell, with the dashboard becoming a hosted app (e.g. a scheduled Dash/Streamlit service or Power BI) reading from the production data layer, and coverage-threshold breaches triggering alerts rather than silent publication.---
-
+Source ingestion via APIs into a staged cloud data layer (e.g. GCS/BigQuery), with automated data-quality checks (structural validation, completeness, FX/sensitivity checks, mirroring validate_inputs here) gating promotion to production tables. Code lives in a version-controlled repo (git/GitHub); pipeline changes run through CI (pytest, as in this submission) on every pull request before merge. The notebook here would become an unattended scheduled job rather than something run cell-by-cell, with the dashboard becoming a hosted app (e.g. a scheduled Dash/Streamlit service or Power BI) reading from the production data layer, and coverage-threshold breaches triggering alerts rather than silent publication.
 # Appendix: Required Conventions Mapped to Code
 
 | Required convention | Where it's implemented |

@@ -69,3 +69,14 @@ def breakdown_exposure(weights: pd.DataFrame, by: str) -> pd.DataFrame:
     )
     grouped['divergence'] = grouped['gross_exposure'] - grouped['net_exposure'].abs()
     return grouped.sort_values('divergence', ascending=False)
+
+
+def contribution_by_dimension(security_returns, weights, security_master, by):
+    """Daily contribution of each bucket to the portfolio return. Contributions
+    are weighted security returns summed within a bucket, so across buckets they
+    add to the daily portfolio return exactly."""
+    weight_series = weights.set_index('Ticker')['Weight']
+    tickers = weight_series.index
+    group = security_master.set_index('Ticker')[by].reindex(tickers)
+    weighted = security_returns[tickers].mul(weight_series, axis=1)
+    return weighted.T.groupby(group).sum().T

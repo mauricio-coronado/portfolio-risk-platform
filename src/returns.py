@@ -77,3 +77,96 @@ def calculate_portfolio_returns(security_returns: pd.DataFrame, weights: pd.Data
         portfolio_return.loc[exclude_days.index] = np.nan
 
     return portfolio_return, coverage
+
+
+def calculate_fx_returns(fx: pd.DataFrame, ticker_currency: pd.Series,
+                         columns: pd.Index) -> pd.DataFrame:
+    """
+    Daily FX return per security: the change in USD value of one unit of that
+    security's local currency.
+
+    FX_Local_per_USD is quoted as local units per USD 1, so a unit of local
+    currency is worth 1/fx in USD and its return is fx_(t-1)/fx_t - 1. A
+    weakening local currency therefore produces a negative FX return.
+
+    Args:
+        fx (pd.DataFrame): FX_Local_per_USD sheet, 'Date' plus one column per currency.
+        ticker_currency (pd.Series): ticker -> currency code.
+        columns (pd.Index): security tickers, in the order to return them.
+
+    Returns:
+        pd.DataFrame: daily FX return, indexed by Date, one column per ticker.
+    """
+    fx_indexed = fx.set_index('Date')
+    fx_returns = fx_indexed.shift(1) / fx_indexed - 1
+
+    per_ticker = fx_returns[ticker_currency.reindex(columns).values].copy()
+    per_ticker.columns = columns
+    return per_ticker
+
+
+def decompose_currency(security_returns_local: pd.DataFrame, fx_returns: pd.DataFrame,
+                       weights: pd.DataFrame) -> pd.DataFrame:
+    """
+    Split the daily portfolio return into a local leg, an FX leg and a cross term.
+
+    For any security the USD return decomposes exactly:
+
+        (1 + r_usd) = (1 + r_local)(1 + r_fx)
+        r_usd       = r_local + r_fx + r_local * r_fx
+
+    The cross term is the interaction: the FX move applies to the grown asset,
+    not the starting one. It is small daily but not zero, and including it is
+    what makes the decomposition exact rather than approximate.
+
+    The FX leg is masked to securities that actually have a return that day. An
+    FX rate exists even where a security's price is missing, and counting FX on
+    a position with no return would put the currency leg on a different book
+    than the local leg, so the legs would stop reconciling.
+
+    Args:
+        security_returns_local (pd.DataFrame): daily local-currency security returns.
+        fx_returns (pd.DataFrame): output of calculate_fx_returns().
+        weights (pd.DataFrame): PortfolioWeights sheet.
+
+    Returns:
+        pd.DataFrame: indexed by Date, columns ['local', 'fx', 'cross'], summing
+            to the daily USD portfolio return.
+    """
+    weight_series = weights.set_index('Ticker')['Weight']
+    tickers = weight_series.index
+
+    local = security_returns_local[tickers]
+    fx_valid = fx_returns[tickers].where(local.notna())
+
+    return pd.DataFrame({
+        'local': local.mul(weight_series, axis=1).sum(axis=1, skipna=True),
+        'fx': fx_valid.mul(weight_series, axis=1).sum(axis=1, skipna=True),
+        'cross': (local * fx_valid).mul(weight_series, axis=1).sum(axis=1, skipna=True),
+    })
+
+
+def fx_contribution_by_currency(security_returns_local: pd.DataFrame,
+                                fx_returns: pd.DataFrame, weights: pd.DataFrame,
+                                ticker_currency: pd.Series) -> pd.DataFrame:
+    """
+    Daily FX contribution attributed to each currency. Columns sum to the 'fx'
+    column of decompose_currency().
+
+    Args:
+        security_returns_local (pd.DataFrame): daily local-currency security
+            returns, used only to mask FX to days a security actually traded.
+        fx_returns (pd.DataFrame): output of calculate_fx_returns().
+        weights (pd.DataFrame): PortfolioWeights sheet.
+        ticker_currency (pd.Series): ticker -> currency code.
+
+    Returns:
+        pd.DataFrame: indexed by Date, one column per currency.
+    """
+    weight_series = weights.set_index('Ticker')['Weight']
+    tickers = weight_series.index
+    currency_of = ticker_currency.reindex(tickers)
+
+    valid = security_returns_local[tickers].notna()
+    weighted_fx = fx_returns[tickers].where(valid).mul(weight_series, axis=1)
+    return weighted_fx.T.groupby(currency_of).sum().T

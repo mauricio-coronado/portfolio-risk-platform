@@ -2,8 +2,8 @@ from src.data_loader import (
     load_inputs, get_security_currencies, validate_inputs,
     summarize_missing_data, convert_to_usd,
 )
-from src.returns import calculate_security_returns, calculate_portfolio_returns
-from src.exposure import reconcile_exposure, breakdown_exposure
+from src.returns import calculate_security_returns, calculate_portfolio_returns, calculate_fx_returns, decompose_currency, fx_contribution_by_currency
+from src.exposure import reconcile_exposure, breakdown_exposure, contribution_by_dimension
 from src.dashboard import build_kpi_summary
 from src.risk_metrics import count_var_exceptions, compare_loan_pricing_frequency
 from src.stress import (
@@ -65,6 +65,17 @@ def main():
     security_returns = calculate_security_returns(tri_usd)
     portfolio_returns, coverage = calculate_portfolio_returns(security_returns, data['PortfolioWeights'])
 
+    weights = data['PortfolioWeights'].copy()
+    weights['Currency'] = weights['Ticker'].map(ticker_currency)
+    data['PortfolioWeights'] = weights
+
+    security_returns_local = calculate_security_returns(data['TotalReturnIndex_Local'])
+    fx_returns = calculate_fx_returns(data['FX_Local_per_USD'], ticker_currency,
+                                    security_returns.columns)
+    currency_legs = decompose_currency(security_returns_local, fx_returns, weights)
+    fx_by_currency = fx_contribution_by_currency(security_returns_local, fx_returns,
+                                                weights, ticker_currency)
+
     valid_days = portfolio_returns.notna().sum()
     total_days = len(portfolio_returns)
     print(f"Portfolio returns: {valid_days} valid observations out of {total_days} total days.")
@@ -93,7 +104,7 @@ def main():
 
     exposure_breakdowns = {}
     print("\n=== Exposure Breakdowns ===")
-    for dimension in ['Asset Type', 'Sector', 'Country', 'Rating']:
+    for dimension in ['Asset Type', 'Sector', 'Country', 'Rating', 'Currency']:
         breakdown = breakdown_exposure(data['PortfolioWeights'], dimension)
         exposure_breakdowns[dimension] = breakdown
         print(f"\n--- By {dimension} ---")
@@ -116,12 +127,18 @@ def main():
     print(f"Rate Shock (+100bps):          {stress_results['rate_shock']:.2%}")
     print(f"Combined (no diversification): {stress_results['combined']:.2%}")
 
+    contributions = {d: contribution_by_dimension(security_returns, weights, data['SecurityMaster'], d)
+                 for d in ['Asset Type', 'Sector', 'Country', 'Rating', 'Currency']}
+
     return {'data': data, 'tri_usd': tri_usd, 'security_returns': security_returns,
             'portfolio_returns': portfolio_returns, 'coverage': coverage, 'exposure': exposure,
             'kpis': kpis, 'exposure_breakdowns': exposure_breakdowns, 'stress_results': stress_results,
             'missing_data': missing,
             'var_backtest': var_backtest,
-            'loan_pricing': loan_pricing}
+            'loan_pricing': loan_pricing,
+            'contributions': contributions,
+            'currency_legs': currency_legs,
+            'fx_by_currency': fx_by_currency}
 
 if __name__ == '__main__':
     main()
