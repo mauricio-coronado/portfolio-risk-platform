@@ -1,16 +1,28 @@
-﻿from riskplatform.data_loader import (
-    load_inputs, get_security_currencies, validate_inputs,
-    summarize_missing_data, convert_to_usd,
+﻿import pandas as pd
+
+from riskplatform.data_loader import (
+    convert_to_usd,
+    get_security_currencies,
+    load_inputs,
+    summarize_missing_data,
+    validate_inputs,
 )
-from riskplatform.returns import calculate_security_returns, calculate_portfolio_returns, calculate_fx_returns, decompose_currency, fx_contribution_by_currency
-from riskplatform.exposure import reconcile_exposure, breakdown_exposure, contribution_by_dimension
+from riskplatform.exposure import breakdown_exposure, contribution_by_dimension, reconcile_exposure
 from riskplatform.kpis import build_kpi_summary
-from riskplatform.risk_metrics import count_var_exceptions, compare_loan_pricing_frequency
-from riskplatform.stress import (
-    calculate_equity_selloff_impact, calculate_rate_shock_impact,
-    calculate_combined_impact, calculate_portfolio_stress_impact,
+from riskplatform.returns import (
+    calculate_fx_returns,
+    calculate_portfolio_returns,
+    calculate_security_returns,
+    decompose_currency,
+    fx_contribution_by_currency,
 )
-import pandas as pd
+from riskplatform.risk_metrics import compare_loan_pricing_frequency, count_var_exceptions
+from riskplatform.stress import (
+    calculate_combined_impact,
+    calculate_equity_selloff_impact,
+    calculate_portfolio_stress_impact,
+    calculate_rate_shock_impact,
+)
 
 
 def main():

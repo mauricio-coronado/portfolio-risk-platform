@@ -1,5 +1,5 @@
-﻿import pandas as pd
-import numpy as np
+﻿import numpy as np
+import pandas as pd
 
 
 def calculate_cumulative_return(returns: pd.Series) -> float:
@@ -77,8 +77,8 @@ def calculate_expected_shortfall(returns: pd.Series, confidence_level: float = 0
 
 def calculate_tail_count(returns: pd.Series, confidence_level: float = 0.95) -> int:
     """
-    Number of observations at or beyond the VaR threshold â€” i.e. the
-    sample size behind calculate_expected_shortfall's average. 
+    Number of observations at or beyond the VaR threshold, i.e. the
+    sample size behind calculate_expected_shortfall's average.
     """
     clean_returns = returns.dropna()
     percentile = (1 - confidence_level) * 100

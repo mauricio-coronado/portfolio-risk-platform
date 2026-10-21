@@ -2,10 +2,10 @@
 import pytest
 
 from riskplatform.stress import (
-    calculate_equity_selloff_impact,
-    calculate_rate_shock_impact,
     calculate_combined_impact,
+    calculate_equity_selloff_impact,
     calculate_portfolio_stress_impact,
+    calculate_rate_shock_impact,
 )
 
 

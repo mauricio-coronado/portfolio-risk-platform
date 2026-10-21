@@ -25,6 +25,7 @@ viz = [
 dev = [
   "pytest>=8.0",
   "pytest-cov>=5.0",
+  "ruff>=0.6",
 ]
 
 [project.scripts]
@@ -32,3 +33,19 @@ riskplatform = "riskplatform.pipeline:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/riskplatform"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "SIM", "PD", "RUF"]
+ignore = [
+  "E501",
+  # .stack() here is the code whose pandas 3 behaviour was fixed deliberately.
+  # Swapping it for .melt() would be a behaviour change dressed as a lint fix.
+  "PD013",
+  # Concatenation reads more clearly than unpacking in the bridge chart.
+  "RUF005",
+]

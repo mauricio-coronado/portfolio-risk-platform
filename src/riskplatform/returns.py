@@ -1,5 +1,6 @@
-﻿import pandas as pd
-import numpy as np
+﻿import numpy as np
+import pandas as pd
+
 
 def calculate_security_returns(total_return_index_usd: pd.DataFrame) -> pd.DataFrame:
     """
@@ -100,7 +101,7 @@ def calculate_fx_returns(fx: pd.DataFrame, ticker_currency: pd.Series,
     fx_indexed = fx.set_index('Date')
     fx_returns = fx_indexed.shift(1) / fx_indexed - 1
 
-    per_ticker = fx_returns[ticker_currency.reindex(columns).values].copy()
+    per_ticker = fx_returns[ticker_currency.reindex(columns).to_numpy()].copy()
     per_ticker.columns = columns
     return per_ticker
 

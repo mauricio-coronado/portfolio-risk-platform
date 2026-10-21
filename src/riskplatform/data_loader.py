@@ -1,5 +1,6 @@
-﻿import pandas as pd
-from pathlib import Path
+﻿from pathlib import Path
+
+import pandas as pd
 
 DEFAULT_DATA_PATH = Path("data") / "candidate_data.xlsx"
 SHEETS = ['SecurityMaster', 'PortfolioWeights', 'TotalReturnIndex_Local',
@@ -97,7 +98,7 @@ def validate_inputs(data: dict) -> None:
 def summarize_missing_data(total_return_index_local: pd.DataFrame) -> pd.DataFrame:
     """
     Report every missing value in TotalReturnIndex_Local, by ticker
-    and date. 
+    and date.
 
     Purely descriptive, does not raise. A small number of missing
     values is expected and handled downstream; this function exists
@@ -181,8 +182,8 @@ def convert_to_usd(total_return_index_local: pd.DataFrame, fx: pd.DataFrame, tic
     # total_return_index_local's shape, so the two can be divided in
     # one vectorized operation instead of looping per ticker.
     currencies_per_column = ticker_currency.reindex(total_return_index_local.columns)
-    fx_rates_aligned = fx[currencies_per_column.values].copy()
-    fx_rates_aligned.columns = total_return_index_local.columns  
+    fx_rates_aligned = fx[currencies_per_column.to_numpy()].copy()
+    fx_rates_aligned.columns = total_return_index_local.columns
 
     total_return_index_usd = (total_return_index_local / fx_rates_aligned).copy()
     return total_return_index_usd.reset_index()

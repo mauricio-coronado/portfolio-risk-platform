@@ -1,12 +1,11 @@
-﻿import pandas as pd
-import numpy as np
-
+﻿import numpy as np
+import pandas as pd
 
 
 def calculate_equity_selloff_impact(security_master: pd.DataFrame, market_shock: float = -0.15) -> pd.Series:
     """
     Per-security return impact under the Equity selloff scenario:
-    security return = beta Ã— market shock. Non-Equity securities
+    security return = beta x market shock. Non-Equity securities
     get an impact of 0.
 
     Args:
@@ -38,7 +37,7 @@ def calculate_equity_selloff_impact(security_master: pd.DataFrame, market_shock:
 def calculate_rate_shock_impact(security_master: pd.DataFrame, delta_y: float = 0.01) -> pd.Series:
     """
     Per-security return impact under the Rate shock scenario:
-    -Duration Ã— Î”y + 0.5 Ã— Convexity Ã— Î”yÂ², applied to Bond and Loan
+    -Duration * Δy + 0.5 * Convexity * Δy², applied to Bond and Loan
     only. Non-fixed-income securities get an impact of 0.
 
     Args:
@@ -128,7 +127,7 @@ def compute_stress_surface(security_master: pd.DataFrame, weights: pd.DataFrame,
     Combined scenario are all specific points inside this same
     surface, not separately computed, nothing is lost by generalizing
     beyond the three named scenarios.
- 
+
     Args:
         security_master (pd.DataFrame): SecurityMaster sheet.
         weights (pd.DataFrame): PortfolioWeights sheet.
@@ -138,7 +137,7 @@ def compute_stress_surface(security_master: pd.DataFrame, weights: pd.DataFrame,
         rate_shocks_bps (array-like): rate shock magnitudes to test,
             in basis points (e.g. 100 for +100bps). Include 0 to
             recover the Equity Selloff-only scenario.
- 
+
     Returns:
         np.ndarray: 2D grid of shape (len(rate_shocks_bps),
             len(equity_shocks)), portfolio impact at each combination.

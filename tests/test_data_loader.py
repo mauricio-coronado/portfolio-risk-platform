@@ -1,7 +1,8 @@
 ﻿import pandas as pd
 import pytest
 
-from riskplatform.data_loader import convert_to_usd, validate_inputs, summarize_missing_data
+from riskplatform.data_loader import convert_to_usd, summarize_missing_data, validate_inputs
+
 
 def test_convert_to_usd_leaves_usd_securities_unchanged():
     """A USD-denominated security should be unchanged by conversion,

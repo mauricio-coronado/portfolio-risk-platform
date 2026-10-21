@@ -3,10 +3,10 @@ import pytest
 
 from riskplatform.risk_metrics import (
     calculate_cumulative_return,
-    calculate_historical_var,
     calculate_expected_shortfall,
+    calculate_historical_var,
     calculate_max_drawdown,
-    count_var_exceptions
+    count_var_exceptions,
 )
 
 

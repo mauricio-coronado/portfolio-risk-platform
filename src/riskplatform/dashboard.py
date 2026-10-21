@@ -1,14 +1,13 @@
-﻿import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
+﻿import matplotlib.gridspec as gridspec
+import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
-from matplotlib.patches import FancyBboxPatch
-import pandas as pd
 import numpy as np
+import pandas as pd
+from matplotlib.patches import FancyBboxPatch
 
-from riskplatform.risk_metrics import calculate_cumulative_return
 from riskplatform.exposure import breakdown_exposure
 from riskplatform.kpis import build_kpi_summary
-
+from riskplatform.risk_metrics import calculate_cumulative_return
 
 PALETTE = {
     "primary": "#3B5B92",
@@ -235,7 +234,7 @@ def build_dashboard_page(portfolio_returns: pd.Series, weights: pd.DataFrame,
     plt.setp(ax_wealth.get_xticklabels(), rotation=20, ha="right")
 
     ax_dd = fig.add_subplot(gs[1, 1])
-    ax_dd.fill_between(drawdown.index, drawdown.values * 100, 0, color=PALETTE["loss"], alpha=0.55)
+    ax_dd.fill_between(drawdown.index, drawdown.to_numpy() * 100, 0, color=PALETTE["loss"], alpha=0.55)
     ax_dd.set_title("Drawdown from Peak")
     ax_dd.set_ylabel("Drawdown (%)")
     ax_dd.yaxis.set_major_formatter(mticker.PercentFormatter())

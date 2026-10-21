@@ -31,5 +31,5 @@ def build_kpi_summary(portfolio_returns: pd.Series) -> dict:
         "tail_n_99": calculate_tail_count(portfolio_returns, 0.99),
         "max_drawdown": calculate_max_drawdown(portfolio_returns),
         "valid_days": int(portfolio_returns.notna().sum()),
-        "total_days": int(len(portfolio_returns)),
+        "total_days": len(portfolio_returns),
     }
