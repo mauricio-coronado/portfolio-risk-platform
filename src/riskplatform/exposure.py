@@ -1,4 +1,4 @@
-﻿import pandas as pd
+import pandas as pd
 
 
 def reconcile_exposure(weights: pd.DataFrame, tolerance: float = 1e-6) -> dict:
@@ -23,15 +23,15 @@ def reconcile_exposure(weights: pd.DataFrame, tolerance: float = 1e-6) -> dict:
         ValueError: if a computed value disagrees with its stated
             counterpart beyond tolerance.
     """
-    net_exposure = weights['Weight'].sum()
-    gross_exposure = weights['Weight'].abs().sum()
-    short_exposure = weights.loc[weights['Weight'] < 0, 'Weight'].sum()
-    long_exposure = weights.loc[weights['Weight'] > 0, 'Weight'].sum()
+    net_exposure = weights["Weight"].sum()
+    gross_exposure = weights["Weight"].abs().sum()
+    short_exposure = weights.loc[weights["Weight"] < 0, "Weight"].sum()
+    long_exposure = weights.loc[weights["Weight"] > 0, "Weight"].sum()
 
-    computed = {'Net': net_exposure, 'Gross': gross_exposure, 'Short': short_exposure}
+    computed = {"Net": net_exposure, "Gross": gross_exposure, "Short": short_exposure}
 
-    if 'Exposure check' in weights.columns:
-        stated = weights.set_index('Exposure check')['Value'].dropna().to_dict()
+    if "Exposure check" in weights.columns:
+        stated = weights.set_index("Exposure check")["Value"].dropna().to_dict()
         for label, computed_value in computed.items():
             if label in stated and abs(computed_value - stated[label]) > tolerance:
                 raise ValueError(
@@ -39,7 +39,12 @@ def reconcile_exposure(weights: pd.DataFrame, tolerance: float = 1e-6) -> dict:
                     f"stated {stated[label]:.4f}"
                 )
 
-    return {'net': net_exposure, 'gross': gross_exposure, 'short': short_exposure, 'long': long_exposure}
+    return {
+        "net": net_exposure,
+        "gross": gross_exposure,
+        "short": short_exposure,
+        "long": long_exposure,
+    }
 
 
 def breakdown_exposure(weights: pd.DataFrame, by: str) -> pd.DataFrame:
@@ -63,21 +68,20 @@ def breakdown_exposure(weights: pd.DataFrame, by: str) -> pd.DataFrame:
             by divergence descending.
     """
     working = weights.copy()
-    working['abs_weight'] = working['Weight'].abs()
+    working["abs_weight"] = working["Weight"].abs()
     grouped = working.groupby(by).agg(
-        net_exposure=('Weight', 'sum'),
-        gross_exposure=('abs_weight', 'sum')
+        net_exposure=("Weight", "sum"), gross_exposure=("abs_weight", "sum")
     )
-    grouped['divergence'] = grouped['gross_exposure'] - grouped['net_exposure'].abs()
-    return grouped.sort_values('divergence', ascending=False)
+    grouped["divergence"] = grouped["gross_exposure"] - grouped["net_exposure"].abs()
+    return grouped.sort_values("divergence", ascending=False)
 
 
 def contribution_by_dimension(security_returns, weights, security_master, by):
     """Daily contribution of each bucket to the portfolio return. Contributions
     are weighted security returns summed within a bucket, so across buckets they
     add to the daily portfolio return exactly."""
-    weight_series = weights.set_index('Ticker')['Weight']
+    weight_series = weights.set_index("Ticker")["Weight"]
     tickers = weight_series.index
-    group = security_master.set_index('Ticker')[by].reindex(tickers)
+    group = security_master.set_index("Ticker")[by].reindex(tickers)
     weighted = security_returns[tickers].mul(weight_series, axis=1)
     return weighted.T.groupby(group).sum().T

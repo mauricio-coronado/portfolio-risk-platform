@@ -1,4 +1,4 @@
-﻿import numpy as np
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -12,25 +12,27 @@ from riskplatform.returns import (
 def test_calculate_security_returns_first_day_is_nan():
     """The first day has no prior day to compare against, so it must
     be NaN, not a fabricated value."""
-    tri_usd = pd.DataFrame({
-        'Date': pd.to_datetime(['2024-01-01', '2024-01-02']),
-        'AAA': [100.0, 110.0],
-    })
+    tri_usd = pd.DataFrame(
+        {
+            "Date": pd.to_datetime(["2024-01-01", "2024-01-02"]),
+            "AAA": [100.0, 110.0],
+        }
+    )
 
     result = calculate_security_returns(tri_usd)
 
-    assert pd.isna(result['AAA'].iloc[0])
-    assert result['AAA'].iloc[1] == pytest.approx(0.10)
+    assert pd.isna(result["AAA"].iloc[0])
+    assert result["AAA"].iloc[1] == pytest.approx(0.10)
 
 
 def test_calculate_portfolio_returns_excludes_low_coverage_day():
     """If a day's valid data covers only a tiny fraction of gross
     weight, the portfolio return for that day should be excluded
     (NaN), not silently computed from the sliver that's present."""
-    weights = pd.DataFrame({'Ticker': ['A', 'B'], 'Weight': [0.99, 0.01]})
+    weights = pd.DataFrame({"Ticker": ["A", "B"], "Weight": [0.99, 0.01]})
     security_returns = pd.DataFrame(
-        {'A': [0.05, np.nan], 'B': [0.02, 0.03]},
-        index=pd.to_datetime(['2024-01-01', '2024-01-02']),
+        {"A": [0.05, np.nan], "B": [0.02, 0.03]},
+        index=pd.to_datetime(["2024-01-01", "2024-01-02"]),
     )
 
     portfolio_return, coverage = calculate_portfolio_returns(

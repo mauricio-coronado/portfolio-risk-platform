@@ -1,10 +1,17 @@
-﻿from pathlib import Path
+from pathlib import Path
 
 import pandas as pd
 
 DEFAULT_DATA_PATH = Path("data") / "candidate_data.xlsx"
-SHEETS = ['SecurityMaster', 'PortfolioWeights', 'TotalReturnIndex_Local',
-          'RawPrice_Local', 'FX_Local_per_USD', 'CorporateActions', 'StressScenarios']
+SHEETS = [
+    "SecurityMaster",
+    "PortfolioWeights",
+    "TotalReturnIndex_Local",
+    "RawPrice_Local",
+    "FX_Local_per_USD",
+    "CorporateActions",
+    "StressScenarios",
+]
 
 
 def load_inputs(path: str | Path | None = None) -> dict:
@@ -40,46 +47,52 @@ def validate_inputs(data: dict) -> None:
             TotalReturnIndex_Local and RawPrice_Local disagree on a
             date not explained by a documented corporate action.
     """
-    sm = data['SecurityMaster']
-    weights = data['PortfolioWeights']
-    tri = data['TotalReturnIndex_Local']
+    sm = data["SecurityMaster"]
+    weights = data["PortfolioWeights"]
+    tri = data["TotalReturnIndex_Local"]
 
-    sm_tickers = set(sm['Ticker'])
-    weight_tickers = set(weights['Ticker'])
-    tri_tickers = set(tri.columns) - {'Date'}
+    sm_tickers = set(sm["Ticker"])
+    weight_tickers = set(weights["Ticker"])
+    tri_tickers = set(tri.columns) - {"Date"}
 
     # No duplicated tickers.
-    for name in ['SecurityMaster', 'PortfolioWeights']:
-        tickers = data[name]['Ticker']
+    for name in ["SecurityMaster", "PortfolioWeights"]:
+        tickers = data[name]["Ticker"]
         duplicates = sorted(tickers[tickers.duplicated()].unique())
         if duplicates:
             raise ValueError(f"{name} has duplicate tickers: {duplicates}")
 
     # Same tickers must appear in all three sheets
     if sm_tickers != weight_tickers:
-        raise ValueError(f"Ticker mismatch, SecurityMaster vs PortfolioWeights: "
-                          f"{sm_tickers.symmetric_difference(weight_tickers)}")
+        raise ValueError(
+            f"Ticker mismatch, SecurityMaster vs PortfolioWeights: "
+            f"{sm_tickers.symmetric_difference(weight_tickers)}"
+        )
     if sm_tickers != tri_tickers:
-        raise ValueError(f"Ticker mismatch, SecurityMaster vs TotalReturnIndex_Local: "
-                          f"{sm_tickers.symmetric_difference(tri_tickers)}")
+        raise ValueError(
+            f"Ticker mismatch, SecurityMaster vs TotalReturnIndex_Local: "
+            f"{sm_tickers.symmetric_difference(tri_tickers)}"
+        )
 
     # Core classification fields must be populated for every security
-    required_fields = ['Ticker', 'Asset Type', 'Sector', 'Country', 'Rating', 'Currency']
+    required_fields = ["Ticker", "Asset Type", "Sector", "Country", "Rating", "Currency"]
     missing_fields = sm[required_fields].isna().sum()
     if missing_fields.any():
-        raise ValueError(f"SecurityMaster has missing required fields:\n{missing_fields[missing_fields > 0]}")
+        raise ValueError(
+            f"SecurityMaster has missing required fields:\n{missing_fields[missing_fields > 0]}"
+        )
 
     # Portfolio weights must add up to 100% (or 1.0) across all securities
-    net_weight = weights['Weight'].sum()
+    net_weight = weights["Weight"].sum()
     if abs(net_weight - 1.0) > 1e-6:
         raise ValueError(f"PortfolioWeights net weight is {net_weight:.6f}, expected 1.0")
 
     # TRI and RawPrice should only diverge on documented split dates
-    raw_price = data['RawPrice_Local']
-    corporate_actions = data['CorporateActions']
+    raw_price = data["RawPrice_Local"]
+    corporate_actions = data["CorporateActions"]
 
-    tri_returns = tri.set_index('Date').pct_change(fill_method=None)
-    raw_returns = raw_price.set_index('Date').pct_change(fill_method=None)
+    tri_returns = tri.set_index("Date").pct_change(fill_method=None)
+    raw_returns = raw_price.set_index("Date").pct_change(fill_method=None)
     common_tickers = [c for c in tri_returns.columns if c in raw_returns.columns]
 
     diff = (tri_returns[common_tickers] - raw_returns[common_tickers]).abs()
@@ -88,11 +101,13 @@ def validate_inputs(data: dict) -> None:
 
     if not discrepancies.empty:
         flagged_dates = set(d for d, t in discrepancies.index)
-        known_split_dates = set(pd.to_datetime(corporate_actions['Effective Date']))
+        known_split_dates = set(pd.to_datetime(corporate_actions["Effective Date"]))
         unexplained_dates = flagged_dates - known_split_dates
         if unexplained_dates:
-            raise ValueError(f"TotalReturnIndex_Local and RawPrice_Local disagree on dates not "
-                              f"explained by CorporateActions: {sorted(unexplained_dates)}")
+            raise ValueError(
+                f"TotalReturnIndex_Local and RawPrice_Local disagree on dates not "
+                f"explained by CorporateActions: {sorted(unexplained_dates)}"
+            )
 
 
 def summarize_missing_data(total_return_index_local: pd.DataFrame) -> pd.DataFrame:
@@ -113,11 +128,11 @@ def summarize_missing_data(total_return_index_local: pd.DataFrame) -> pd.DataFra
         pd.DataFrame: one row per missing value, columns ['Date', 'Ticker'].
             Empty DataFrame if there are no missing values.
     """
-    missing = total_return_index_local.set_index('Date').isna()
+    missing = total_return_index_local.set_index("Date").isna()
     missing_long = missing[missing.any(axis=1)].stack()
     missing_long = missing_long[missing_long].reset_index()
-    missing_long.columns = ['Date', 'Ticker', '_']
-    return missing_long[['Date', 'Ticker']]
+    missing_long.columns = ["Date", "Ticker", "_"]
+    return missing_long[["Date", "Ticker"]]
 
 
 def get_security_currencies(security_master: pd.DataFrame) -> pd.Series:
@@ -131,10 +146,12 @@ def get_security_currencies(security_master: pd.DataFrame) -> pd.Series:
     Returns:
         pd.Series: local currency code (e.g. 'USD', 'EUR'), indexed by Ticker.
     """
-    return security_master.set_index('Ticker')['Currency']
+    return security_master.set_index("Ticker")["Currency"]
 
 
-def convert_to_usd(total_return_index_local: pd.DataFrame, fx: pd.DataFrame, ticker_currency: pd.Series) -> pd.DataFrame:
+def convert_to_usd(
+    total_return_index_local: pd.DataFrame, fx: pd.DataFrame, ticker_currency: pd.Series
+) -> pd.DataFrame:
     """
     Convert TotalReturnIndex_Local (local currency) to USD, per security,
     using each security's own currency.
@@ -164,9 +181,11 @@ def convert_to_usd(total_return_index_local: pd.DataFrame, fx: pd.DataFrame, tic
         AssertionError: if total_return_index_local and fx do not share the same Date index.
         ValueError: if a currency in ticker_currency has no matching column in fx.
     """
-    assert total_return_index_local['Date'].equals(fx['Date']), "TRI and FX date indices do not match"
+    assert total_return_index_local["Date"].equals(fx["Date"]), (
+        "TRI and FX date indices do not match"
+    )
 
-    fx = fx.set_index('Date')
+    fx = fx.set_index("Date")
     total_return_index_local = total_return_index_local.set_index("Date")
 
     used_currencies = ticker_currency.unique()
@@ -175,8 +194,10 @@ def convert_to_usd(total_return_index_local: pd.DataFrame, fx: pd.DataFrame, tic
             raise ValueError(f"No FX rate column found for currency '{currency}'")
         missing_dates = fx[currency][fx[currency].isna()].index
         if len(missing_dates) > 0:
-            print(f"WARNING: {currency} FX rate missing on {len(missing_dates)} date(s): "
-                  f"{list(missing_dates)}. This will affect all {currency}-denominated securities.")
+            print(
+                f"WARNING: {currency} FX rate missing on {len(missing_dates)} date(s): "
+                f"{list(missing_dates)}. This will affect all {currency}-denominated securities."
+            )
 
     # Broadcast each ticker's FX rate into its own column, mirroring
     # total_return_index_local's shape, so the two can be divided in

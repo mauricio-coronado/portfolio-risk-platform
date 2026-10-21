@@ -1,4 +1,4 @@
-﻿import numpy as np
+import numpy as np
 import pandas as pd
 
 
@@ -20,12 +20,15 @@ def calculate_security_returns(total_return_index_usd: pd.DataFrame) -> pd.DataF
             ticker. First row is NaN for every ticker (no prior day to
             compare against).
     """
-    return total_return_index_usd.set_index('Date').pct_change(fill_method=None)
+    return total_return_index_usd.set_index("Date").pct_change(fill_method=None)
 
 
-def calculate_portfolio_returns(security_returns: pd.DataFrame, weights: pd.DataFrame,
-                                  warn_threshold: float = 0.99,
-                                  exclude_threshold: float = 0.95) -> tuple[pd.Series, pd.Series]:
+def calculate_portfolio_returns(
+    security_returns: pd.DataFrame,
+    weights: pd.DataFrame,
+    warn_threshold: float = 0.99,
+    exclude_threshold: float = 0.95,
+) -> tuple[pd.Series, pd.Series]:
     """
     Calculate daily portfolio returns as the weighted sum of security
     returns, using signed net weights. A security with no return that
@@ -51,7 +54,7 @@ def calculate_portfolio_returns(security_returns: pd.DataFrame, weights: pd.Data
             coverage: daily share (0-1) of gross weight backed by
                 valid data, indexed by Date.
     """
-    weight_series = weights.set_index('Ticker')['Weight']
+    weight_series = weights.set_index("Ticker")["Weight"]
     gross_weight_total = weight_series.abs().sum()
 
     aligned_returns = security_returns[weight_series.index]
@@ -67,21 +70,26 @@ def calculate_portfolio_returns(security_returns: pd.DataFrame, weights: pd.Data
     exclude_days = coverage[coverage < exclude_threshold]
 
     if not warn_days.empty:
-        print(f"WARNING: {len(warn_days)} day(s) between {exclude_threshold:.0%}-{warn_threshold:.0%} "
-              f"coverage, included but flagged for review:")
+        print(
+            f"WARNING: {len(warn_days)} day(s) between {exclude_threshold:.0%}-{warn_threshold:.0%} "
+            f"coverage, included but flagged for review:"
+        )
         print(warn_days)
 
     if not exclude_days.empty:
-        print(f"EXCLUDED: {len(exclude_days)} day(s) below {exclude_threshold:.0%} coverage, "
-              f"return set to NaN:")
+        print(
+            f"EXCLUDED: {len(exclude_days)} day(s) below {exclude_threshold:.0%} coverage, "
+            f"return set to NaN:"
+        )
         print(exclude_days)
         portfolio_return.loc[exclude_days.index] = np.nan
 
     return portfolio_return, coverage
 
 
-def calculate_fx_returns(fx: pd.DataFrame, ticker_currency: pd.Series,
-                         columns: pd.Index) -> pd.DataFrame:
+def calculate_fx_returns(
+    fx: pd.DataFrame, ticker_currency: pd.Series, columns: pd.Index
+) -> pd.DataFrame:
     """
     Daily FX return per security: the change in USD value of one unit of that
     security's local currency.
@@ -98,7 +106,7 @@ def calculate_fx_returns(fx: pd.DataFrame, ticker_currency: pd.Series,
     Returns:
         pd.DataFrame: daily FX return, indexed by Date, one column per ticker.
     """
-    fx_indexed = fx.set_index('Date')
+    fx_indexed = fx.set_index("Date")
     fx_returns = fx_indexed.shift(1) / fx_indexed - 1
 
     per_ticker = fx_returns[ticker_currency.reindex(columns).to_numpy()].copy()
@@ -106,8 +114,9 @@ def calculate_fx_returns(fx: pd.DataFrame, ticker_currency: pd.Series,
     return per_ticker
 
 
-def decompose_currency(security_returns_local: pd.DataFrame, fx_returns: pd.DataFrame,
-                       weights: pd.DataFrame) -> pd.DataFrame:
+def decompose_currency(
+    security_returns_local: pd.DataFrame, fx_returns: pd.DataFrame, weights: pd.DataFrame
+) -> pd.DataFrame:
     """
     Split the daily portfolio return into a local leg, an FX leg and a cross term.
 
@@ -134,22 +143,27 @@ def decompose_currency(security_returns_local: pd.DataFrame, fx_returns: pd.Data
         pd.DataFrame: indexed by Date, columns ['local', 'fx', 'cross'], summing
             to the daily USD portfolio return.
     """
-    weight_series = weights.set_index('Ticker')['Weight']
+    weight_series = weights.set_index("Ticker")["Weight"]
     tickers = weight_series.index
 
     local = security_returns_local[tickers]
     fx_valid = fx_returns[tickers].where(local.notna())
 
-    return pd.DataFrame({
-        'local': local.mul(weight_series, axis=1).sum(axis=1, skipna=True),
-        'fx': fx_valid.mul(weight_series, axis=1).sum(axis=1, skipna=True),
-        'cross': (local * fx_valid).mul(weight_series, axis=1).sum(axis=1, skipna=True),
-    })
+    return pd.DataFrame(
+        {
+            "local": local.mul(weight_series, axis=1).sum(axis=1, skipna=True),
+            "fx": fx_valid.mul(weight_series, axis=1).sum(axis=1, skipna=True),
+            "cross": (local * fx_valid).mul(weight_series, axis=1).sum(axis=1, skipna=True),
+        }
+    )
 
 
-def fx_contribution_by_currency(security_returns_local: pd.DataFrame,
-                                fx_returns: pd.DataFrame, weights: pd.DataFrame,
-                                ticker_currency: pd.Series) -> pd.DataFrame:
+def fx_contribution_by_currency(
+    security_returns_local: pd.DataFrame,
+    fx_returns: pd.DataFrame,
+    weights: pd.DataFrame,
+    ticker_currency: pd.Series,
+) -> pd.DataFrame:
     """
     Daily FX contribution attributed to each currency. Columns sum to the 'fx'
     column of decompose_currency().
@@ -164,7 +178,7 @@ def fx_contribution_by_currency(security_returns_local: pd.DataFrame,
     Returns:
         pd.DataFrame: indexed by Date, one column per currency.
     """
-    weight_series = weights.set_index('Ticker')['Weight']
+    weight_series = weights.set_index("Ticker")["Weight"]
     tickers = weight_series.index
     currency_of = ticker_currency.reindex(tickers)
 

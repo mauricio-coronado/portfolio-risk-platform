@@ -1,4 +1,4 @@
-﻿import numpy as np
+import numpy as np
 import pandas as pd
 
 
@@ -75,6 +75,7 @@ def calculate_expected_shortfall(returns: pd.Series, confidence_level: float = 0
     tail_returns = clean_returns[clean_returns <= var_threshold]
     return -tail_returns.mean()
 
+
 def calculate_tail_count(returns: pd.Series, confidence_level: float = 0.95) -> int:
     """
     Number of observations at or beyond the VaR threshold, i.e. the
@@ -114,8 +115,9 @@ def count_var_exceptions(returns: pd.Series, var_estimate: float) -> int:
     return int((clean_returns < -var_estimate).sum())
 
 
-def compare_loan_pricing_frequency(tri_local: pd.DataFrame, security_master: pd.DataFrame,
-                                     weights: pd.DataFrame) -> dict:
+def compare_loan_pricing_frequency(
+    tri_local: pd.DataFrame, security_master: pd.DataFrame, weights: pd.DataFrame
+) -> dict:
     """
     Checks whether Loan securities' weekly repricing (SecurityMaster's
     Pricing Frequency) understates volatility when treated as a daily
@@ -123,19 +125,19 @@ def compare_loan_pricing_frequency(tri_local: pd.DataFrame, security_master: pd.
     resampled weekly estimate, plus how often the whole loan sleeve is
     simultaneously stale.
     """
-    loans = security_master.loc[security_master['Pricing Frequency'] == 'Weekly', 'Ticker']
-    loan_returns = tri_local.set_index('Date')[loans].pct_change(fill_method=None)
+    loans = security_master.loc[security_master["Pricing Frequency"] == "Weekly", "Ticker"]
+    loan_returns = tri_local.set_index("Date")[loans].pct_change(fill_method=None)
 
-    daily_vol = loan_returns.std() * (252 ** 0.5)
-    weekly_returns = (1 + loan_returns).resample('W').prod() - 1
-    weekly_vol = weekly_returns.std() * (52 ** 0.5)
+    daily_vol = loan_returns.std() * (252**0.5)
+    weekly_returns = (1 + loan_returns).resample("W").prod() - 1
+    weekly_vol = weekly_returns.std() * (52**0.5)
 
-    loan_weights = weights.set_index('Ticker')['Weight'][loans]
+    loan_weights = weights.set_index("Ticker")["Weight"][loans]
     sub_portfolio = loan_returns.mul(loan_weights, axis=1).sum(axis=1) / loan_weights.sum()
     stale_day_fraction = (sub_portfolio.abs() < 1e-12).mean()
 
     return {
-        'median_daily_scaled_vol': daily_vol.median(),
-        'median_weekly_scaled_vol': weekly_vol.median(),
-        'sub_portfolio_stale_day_fraction': stale_day_fraction,
+        "median_daily_scaled_vol": daily_vol.median(),
+        "median_weekly_scaled_vol": weekly_vol.median(),
+        "sub_portfolio_stale_day_fraction": stale_day_fraction,
     }

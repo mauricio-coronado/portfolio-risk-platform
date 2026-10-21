@@ -1,4 +1,4 @@
-﻿import matplotlib.gridspec as gridspec
+import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
@@ -19,20 +19,22 @@ PALETTE = {
     "text_muted": "#6B7280",
 }
 
-plt.rcParams.update({
-    "font.family": "sans-serif",
-    "font.size": 10,
-    "axes.edgecolor": "#D0D3D8",
-    "axes.labelcolor": PALETTE["text_dark"],
-    "text.color": PALETTE["text_dark"],
-    "axes.grid": True,
-    "grid.color": "#E5E7EB",
-    "grid.linewidth": 0.6,
-    "axes.spines.top": False,
-    "axes.spines.right": False,
-    "axes.titlesize": 11,
-    "axes.titleweight": "bold",
-})
+plt.rcParams.update(
+    {
+        "font.family": "sans-serif",
+        "font.size": 10,
+        "axes.edgecolor": "#D0D3D8",
+        "axes.labelcolor": PALETTE["text_dark"],
+        "text.color": PALETTE["text_dark"],
+        "axes.grid": True,
+        "grid.color": "#E5E7EB",
+        "grid.linewidth": 0.6,
+        "axes.spines.top": False,
+        "axes.spines.right": False,
+        "axes.titlesize": 11,
+        "axes.titleweight": "bold",
+    }
+)
 
 
 def _draw_kpi_cards(ax_kpi, kpis):
@@ -50,15 +52,39 @@ def _draw_kpi_cards(ax_kpi, kpis):
     for i, (label, value, is_loss) in enumerate(kpi_items):
         x = i / n
         w = 1 / n * 0.92
-        card = FancyBboxPatch((x, 0.05), w, 0.9, boxstyle="round,pad=0.01,rounding_size=0.02",
-                                transform=ax_kpi.transAxes, facecolor=PALETTE["bg_card"],
-                                edgecolor="#E0E2E6", linewidth=1)
+        card = FancyBboxPatch(
+            (x, 0.05),
+            w,
+            0.9,
+            boxstyle="round,pad=0.01,rounding_size=0.02",
+            transform=ax_kpi.transAxes,
+            facecolor=PALETTE["bg_card"],
+            edgecolor="#E0E2E6",
+            linewidth=1,
+        )
         ax_kpi.add_patch(card)
         color = PALETTE["loss"] if is_loss else PALETTE["text_dark"]
-        ax_kpi.text(x + w / 2, 0.62, value, transform=ax_kpi.transAxes, ha="center", va="center",
-                    fontsize=14, fontweight="bold", color=color)
-        ax_kpi.text(x + w / 2, 0.25, label, transform=ax_kpi.transAxes, ha="center", va="center",
-                    fontsize=8, color=PALETTE["text_muted"])
+        ax_kpi.text(
+            x + w / 2,
+            0.62,
+            value,
+            transform=ax_kpi.transAxes,
+            ha="center",
+            va="center",
+            fontsize=14,
+            fontweight="bold",
+            color=color,
+        )
+        ax_kpi.text(
+            x + w / 2,
+            0.25,
+            label,
+            transform=ax_kpi.transAxes,
+            ha="center",
+            va="center",
+            fontsize=8,
+            color=PALETTE["text_muted"],
+        )
 
 
 # def build_dashboard_page(portfolio_returns: pd.Series, weights: pd.DataFrame,
@@ -164,13 +190,17 @@ def _draw_kpi_cards(ax_kpi, kpis):
 #     return fig
 
 
-
-def build_dashboard_page(portfolio_returns: pd.Series, weights: pd.DataFrame,
-                         equity_shocks, rate_shocks_bps, stress_grid,
-                         exposure_dimension: str = "Asset Type",
-                         contribution: pd.DataFrame | None = None,
-                         currency_legs: pd.DataFrame | None = None,
-                         fx_by_currency: pd.DataFrame | None = None) -> plt.Figure:
+def build_dashboard_page(
+    portfolio_returns: pd.Series,
+    weights: pd.DataFrame,
+    equity_shocks,
+    rate_shocks_bps,
+    stress_grid,
+    exposure_dimension: str = "Asset Type",
+    contribution: pd.DataFrame | None = None,
+    currency_legs: pd.DataFrame | None = None,
+    fx_by_currency: pd.DataFrame | None = None,
+) -> plt.Figure:
     """
     Assemble the full single-page risk dashboard.
 
@@ -215,11 +245,27 @@ def build_dashboard_page(portfolio_returns: pd.Series, weights: pd.DataFrame,
     drawdown = (wealth - running_max) / running_max
 
     fig = plt.figure(figsize=(12, 9.5))
-    gs = gridspec.GridSpec(4, 2, height_ratios=[0.32, 1, 1, 1], hspace=0.65,
-                            wspace=0.28, left=0.07, right=0.95, top=0.945, bottom=0.05)
+    gs = gridspec.GridSpec(
+        4,
+        2,
+        height_ratios=[0.32, 1, 1, 1],
+        hspace=0.65,
+        wspace=0.28,
+        left=0.07,
+        right=0.95,
+        top=0.945,
+        bottom=0.05,
+    )
 
-    fig.suptitle("Portfolio Risk Dashboard", fontsize=13, fontweight="bold",
-                 x=0.07, ha="left", color=PALETTE["text_dark"], y=0.985)
+    fig.suptitle(
+        "Portfolio Risk Dashboard",
+        fontsize=13,
+        fontweight="bold",
+        x=0.07,
+        ha="left",
+        color=PALETTE["text_dark"],
+        y=0.985,
+    )
 
     ax_kpi = fig.add_subplot(gs[0, :])
     ax_kpi.axis("off")
@@ -230,15 +276,17 @@ def build_dashboard_page(portfolio_returns: pd.Series, weights: pd.DataFrame,
     ax_wealth.set_title("Cumulative Wealth")
     ax_wealth.set_ylabel("Wealth (growth of $1)")
     ax_wealth.xaxis.set_major_locator(mticker.MaxNLocator(5))
-    ax_wealth.tick_params(axis='x', labelsize=9)
+    ax_wealth.tick_params(axis="x", labelsize=9)
     plt.setp(ax_wealth.get_xticklabels(), rotation=20, ha="right")
 
     ax_dd = fig.add_subplot(gs[1, 1])
-    ax_dd.fill_between(drawdown.index, drawdown.to_numpy() * 100, 0, color=PALETTE["loss"], alpha=0.55)
+    ax_dd.fill_between(
+        drawdown.index, drawdown.to_numpy() * 100, 0, color=PALETTE["loss"], alpha=0.55
+    )
     ax_dd.set_title("Drawdown from Peak")
     ax_dd.set_ylabel("Drawdown (%)")
     ax_dd.yaxis.set_major_formatter(mticker.PercentFormatter())
-    ax_dd.tick_params(axis='x', labelsize=9)
+    ax_dd.tick_params(axis="x", labelsize=9)
     ax_dd.xaxis.set_major_locator(mticker.MaxNLocator(5))
     plt.setp(ax_dd.get_xticklabels(), rotation=20, ha="right")
 
@@ -248,18 +296,19 @@ def build_dashboard_page(portfolio_returns: pd.Series, weights: pd.DataFrame,
     ax_exp = fig.add_subplot(gs[2, 0])
     exp_data = breakdown_exposure(weights, exposure_dimension)
     y_pos = range(len(exp_data))
-    ax_exp.barh(y_pos, exp_data["gross_exposure"] * 100, color=PALETTE["gross"],
-                height=0.62, label="Gross")
-    ax_exp.barh(y_pos, exp_data["net_exposure"] * 100, color=PALETTE["primary"],
-                height=0.3, label="Net")
+    ax_exp.barh(
+        y_pos, exp_data["gross_exposure"] * 100, color=PALETTE["gross"], height=0.62, label="Gross"
+    )
+    ax_exp.barh(
+        y_pos, exp_data["net_exposure"] * 100, color=PALETTE["primary"], height=0.3, label="Net"
+    )
     ax_exp.set_yticks(list(y_pos))
     ax_exp.set_yticklabels(exp_data.index, fontsize=8.5)
     ax_exp.invert_yaxis()
     ax_exp.set_title(f"Exposure by {exposure_dimension}")
     ax_exp.set_xlabel("Exposure (% of NAV)")
     ax_exp.grid(axis="y", visible=False)
-    ax_exp.legend(fontsize=8, loc="lower right", frameon=True, framealpha=0.92,
-                  edgecolor="none")
+    ax_exp.legend(fontsize=8, loc="lower right", frameon=True, framealpha=0.92, edgecolor="none")
 
     ax_con = fig.add_subplot(gs[2, 1])
     ax_con.set_title(f"Return Contribution by {exposure_dimension}")
@@ -275,20 +324,32 @@ def build_dashboard_page(portfolio_returns: pd.Series, weights: pd.DataFrame,
         ax_con.axvline(0, color=PALETTE["text_dark"], linewidth=0.9)
 
         for i, value in enumerate(totals.values):
-            ax_con.annotate(f"{value:+.1f} pp", xy=(value, i),
-                            xytext=(-6 if value < 0 else 6, 0),
-                            textcoords="offset points", va="center",
-                            ha="right" if value < 0 else "left", fontsize=9,
-                            color=PALETTE["text_dark"])
+            ax_con.annotate(
+                f"{value:+.1f} pp",
+                xy=(value, i),
+                xytext=(-6 if value < 0 else 6, 0),
+                textcoords="offset points",
+                va="center",
+                ha="right" if value < 0 else "left",
+                fontsize=9,
+                color=PALETTE["text_dark"],
+            )
 
         # Room for the value labels so they never clip at either end.
         span = max(abs(totals.min()), abs(totals.max())) or 1.0
-        ax_con.set_xlim(min(totals.min(), 0) - span * 0.55,
-                        max(totals.max(), 0) + span * 0.55)
+        ax_con.set_xlim(min(totals.min(), 0) - span * 0.55, max(totals.max(), 0) + span * 0.55)
         ax_con.set_xlabel("Contribution to portfolio return (pp, arithmetic)")
     else:
-        ax_con.text(0.5, 0.5, "no contribution data supplied", transform=ax_con.transAxes,
-                    ha="center", va="center", fontsize=9, color=PALETTE["text_muted"])
+        ax_con.text(
+            0.5,
+            0.5,
+            "no contribution data supplied",
+            transform=ax_con.transAxes,
+            ha="center",
+            va="center",
+            fontsize=9,
+            color=PALETTE["text_muted"],
+        )
         ax_con.set_xticks([])
         ax_con.set_yticks([])
         ax_con.grid(visible=False)
@@ -298,9 +359,16 @@ def build_dashboard_page(portfolio_returns: pd.Series, weights: pd.DataFrame,
         _draw_return_bridge(ax_bridge, currency_legs, fx_by_currency, portfolio_returns)
     else:
         ax_bridge.set_title("From Local Return to USD Return")
-        ax_bridge.text(0.5, 0.5, "no currency decomposition supplied",
-                       transform=ax_bridge.transAxes, ha="center", va="center",
-                       fontsize=9, color=PALETTE["text_muted"])
+        ax_bridge.text(
+            0.5,
+            0.5,
+            "no currency decomposition supplied",
+            transform=ax_bridge.transAxes,
+            ha="center",
+            va="center",
+            fontsize=9,
+            color=PALETTE["text_muted"],
+        )
         ax_bridge.set_xticks([])
         ax_bridge.set_yticks([])
         ax_bridge.grid(visible=False)
@@ -308,23 +376,57 @@ def build_dashboard_page(portfolio_returns: pd.Series, weights: pd.DataFrame,
     ax_stress = fig.add_subplot(gs[3, 1])
     equity_shocks = np.asarray(equity_shocks)
     rate_shocks_bps = np.asarray(rate_shocks_bps)
-    im = ax_stress.pcolormesh(equity_shocks * 100, rate_shocks_bps, stress_grid * 100,
-                            cmap="YlOrRd_r", shading="gouraud")
+    im = ax_stress.pcolormesh(
+        equity_shocks * 100, rate_shocks_bps, stress_grid * 100, cmap="YlOrRd_r", shading="gouraud"
+    )
     cbar = fig.colorbar(im, ax=ax_stress, fraction=0.046, pad=0.04)
     cbar.set_label("Portfolio Impact (%)", fontsize=10)
     cbar.ax.tick_params(labelsize=9)
 
-    equity_only_value = stress_grid[np.argmin(np.abs(rate_shocks_bps - 0)), np.argmin(np.abs(equity_shocks - (-0.15)))]
-    ax_stress.plot(-15, 0, marker="D", color="white", markeredgecolor="black", markersize=8, zorder=5)
-    ax_stress.annotate(f"Equity Selloff\n{equity_only_value:.2%}", (-15, 0), textcoords="offset points", xytext=(0, 8), fontsize=9, ha="center")
+    equity_only_value = stress_grid[
+        np.argmin(np.abs(rate_shocks_bps - 0)), np.argmin(np.abs(equity_shocks - (-0.15)))
+    ]
+    ax_stress.plot(
+        -15, 0, marker="D", color="white", markeredgecolor="black", markersize=8, zorder=5
+    )
+    ax_stress.annotate(
+        f"Equity Selloff\n{equity_only_value:.2%}",
+        (-15, 0),
+        textcoords="offset points",
+        xytext=(0, 8),
+        fontsize=9,
+        ha="center",
+    )
 
-    rate_only_value = stress_grid[np.argmin(np.abs(rate_shocks_bps - 100)), np.argmin(np.abs(equity_shocks - 0))]
-    ax_stress.plot(0, 100, marker="D", color="white", markeredgecolor="black", markersize=8, zorder=5)
-    ax_stress.annotate(f"Rate Shock\n{rate_only_value:.2%}", (0, 100), textcoords="offset points", xytext=(-55, 3), fontsize=9, ha="left")
+    rate_only_value = stress_grid[
+        np.argmin(np.abs(rate_shocks_bps - 100)), np.argmin(np.abs(equity_shocks - 0))
+    ]
+    ax_stress.plot(
+        0, 100, marker="D", color="white", markeredgecolor="black", markersize=8, zorder=5
+    )
+    ax_stress.annotate(
+        f"Rate Shock\n{rate_only_value:.2%}",
+        (0, 100),
+        textcoords="offset points",
+        xytext=(-55, 3),
+        fontsize=9,
+        ha="left",
+    )
 
-    ax_stress.plot(-15, 100, marker="*", color="gold", markeredgecolor="black", markersize=13, zorder=5)
-    combined_value = stress_grid[np.argmin(np.abs(rate_shocks_bps - 100)), np.argmin(np.abs(equity_shocks - (-0.15)))]
-    ax_stress.annotate(f"Combined\n{combined_value:.2%}", (-15, 100), textcoords="offset points", xytext=(8, 3), fontsize=9, fontweight="bold")
+    ax_stress.plot(
+        -15, 100, marker="*", color="gold", markeredgecolor="black", markersize=13, zorder=5
+    )
+    combined_value = stress_grid[
+        np.argmin(np.abs(rate_shocks_bps - 100)), np.argmin(np.abs(equity_shocks - (-0.15)))
+    ]
+    ax_stress.annotate(
+        f"Combined\n{combined_value:.2%}",
+        (-15, 100),
+        textcoords="offset points",
+        xytext=(8, 3),
+        fontsize=9,
+        fontweight="bold",
+    )
 
     ax_stress.set_xlim(-25, 2)
     ax_stress.set_ylim(-5, 210)
@@ -348,16 +450,16 @@ def _draw_return_bridge(ax, currency_legs, fx_by_currency, portfolio_returns):
     closes exactly on the figure shown in the KPI strip rather than on the
     arithmetic total.
     """
-    local = currency_legs['local'].sum() * 100
-    cross = currency_legs['cross'].sum() * 100
-    fx_steps = (fx_by_currency.sum() * 100).drop('USD', errors='ignore').sort_index()
+    local = currency_legs["local"].sum() * 100
+    cross = currency_legs["cross"].sum() * 100
+    fx_steps = (fx_by_currency.sum() * 100).drop("USD", errors="ignore").sort_index()
 
     arithmetic = local + fx_steps.sum() + cross
     total = calculate_cumulative_return(portfolio_returns) * 100
     compounding = total - arithmetic + cross
 
     steps = list(fx_steps.values) + [compounding]
-    labels = ['Local'] + list(fx_steps.index) + ['Compound', 'USD']
+    labels = ["Local"] + list(fx_steps.index) + ["Compound", "USD"]
 
     # Running level after each bar, used for the floating bars and the connectors.
     levels = [local]
@@ -372,17 +474,28 @@ def _draw_return_bridge(ax, currency_legs, fx_by_currency, portfolio_returns):
     ax.bar(len(labels) - 1, total, width=0.62, color=PALETTE["primary"])
 
     for i, level in enumerate(levels):
-        ax.plot([i + 0.31, i + 1 - 0.31], [level, level],
-                color=PALETTE["text_muted"], linewidth=0.8, linestyle=(0, (3, 3)))
+        ax.plot(
+            [i + 0.31, i + 1 - 0.31],
+            [level, level],
+            color=PALETTE["text_muted"],
+            linewidth=0.8,
+            linestyle=(0, (3, 3)),
+        )
 
     values = [local] + steps + [total]
     for i, value in enumerate(values):
         top = value if i in (0, len(values) - 1) else max(levels[i - 1], levels[i])
         bottom = 0 if i in (0, len(values) - 1) else min(levels[i - 1], levels[i])
         anchor = top if value >= 0 or i in (0, len(values) - 1) else bottom
-        ax.annotate(f"{value:+.2f}", xy=(i, anchor),
-                    xytext=(0, 4 if anchor >= 0 else -11), textcoords="offset points",
-                    ha="center", fontsize=9, color=PALETTE["text_dark"])
+        ax.annotate(
+            f"{value:+.2f}",
+            xy=(i, anchor),
+            xytext=(0, 4 if anchor >= 0 else -11),
+            textcoords="offset points",
+            ha="center",
+            fontsize=9,
+            color=PALETTE["text_dark"],
+        )
 
     ax.axhline(0, color=PALETTE["text_dark"], linewidth=0.9)
     ax.set_xticks(range(len(labels)))

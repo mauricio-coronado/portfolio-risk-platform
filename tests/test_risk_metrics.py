@@ -1,4 +1,4 @@
-﻿import pandas as pd
+import pandas as pd
 import pytest
 
 from riskplatform.risk_metrics import (
