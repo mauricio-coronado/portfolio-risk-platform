@@ -4,7 +4,7 @@
 )
 from riskplatform.returns import calculate_security_returns, calculate_portfolio_returns, calculate_fx_returns, decompose_currency, fx_contribution_by_currency
 from riskplatform.exposure import reconcile_exposure, breakdown_exposure, contribution_by_dimension
-from riskplatform.dashboard import build_kpi_summary
+from riskplatform.kpis import build_kpi_summary
 from riskplatform.risk_metrics import count_var_exceptions, compare_loan_pricing_frequency
 from riskplatform.stress import (
     calculate_equity_selloff_impact, calculate_rate_shock_impact,
