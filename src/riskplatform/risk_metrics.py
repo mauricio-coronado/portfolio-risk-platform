@@ -16,7 +16,7 @@ def calculate_cumulative_return(returns: pd.Series) -> float:
         float: cumulative return over the period (e.g. 0.15 = +15%).
     """
     clean_returns = returns.dropna()
-    return (1 + clean_returns).prod() - 1
+    return (1 + clean_returns).prod() - 1  # type: ignore[operator,return-value]
 
 
 def calculate_annualized_volatility(returns: pd.Series, periods_per_year: int = 252) -> float:

@@ -272,7 +272,7 @@ def build_dashboard_page(
     _draw_kpi_cards(ax_kpi, kpis)
 
     ax_wealth = fig.add_subplot(gs[1, 0])
-    ax_wealth.plot(wealth.index, wealth.values, color=PALETTE["primary"], linewidth=1.3)
+    ax_wealth.plot(wealth.index, wealth.to_numpy(), color=PALETTE["primary"], linewidth=1.3)
     ax_wealth.set_title("Cumulative Wealth")
     ax_wealth.set_ylabel("Wealth (growth of $1)")
     ax_wealth.xaxis.set_major_locator(mticker.MaxNLocator(5))
@@ -317,7 +317,7 @@ def build_dashboard_page(
         totals = contribution.sum().reindex(exp_data.index).fillna(0.0) * 100
         y_pos = range(len(totals))
         colours = [PALETTE["loss"] if value < 0 else PALETTE["gain"] for value in totals]
-        ax_con.barh(y_pos, totals.values, color=colours, height=0.6)
+        ax_con.barh(y_pos, totals.to_numpy(), color=colours, height=0.6)
         ax_con.set_yticks(list(y_pos))
         ax_con.set_yticklabels(totals.index, fontsize=8.5)
         ax_con.invert_yaxis()

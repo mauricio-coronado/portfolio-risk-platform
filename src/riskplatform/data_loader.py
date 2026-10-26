@@ -130,6 +130,9 @@ def summarize_missing_data(total_return_index_local: pd.DataFrame) -> pd.DataFra
     """
     missing = total_return_index_local.set_index("Date").isna()
     missing_long = missing[missing.any(axis=1)].stack()
+
+    assert isinstance(missing_long, pd.Series)          # narrows from here down
+
     missing_long = missing_long[missing_long].reset_index()
     missing_long.columns = ["Date", "Ticker", "_"]
     return missing_long[["Date", "Ticker"]]
