@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-DEFAULT_DATA_PATH = Path("data") / "candidate_data.xlsx"
+DEFAULT_DATA_PATH = Path("data") / "portfolio.xlsx"
 SHEETS = [
     "SecurityMaster",
     "PortfolioWeights",
