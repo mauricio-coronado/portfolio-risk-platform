@@ -80,3 +80,16 @@ pytest
 - **Stress results** are shown as a continuous sensitivity surface (equity shock × rate shock), with the three required scenarios marked as specific points on it, rather than three isolated bars.
 
 Full reasoning and evidence for each of these lives in `docs/methodology.md`.
+
+## Roadmap
+
+Built one phase at a time, each ending in something runnable.
+
+- [x] **0. Repo foundation.** Installable package, ruff, mypy, synthetic dataset, licence
+- [ ] **1. Deployed dashboard.** Interactive panels, public URL
+- [ ] **2. Results storage.** Run and result tables, idempotent writes, one current run per date
+- [ ] **3. Generated commentary.** Deterministic selection of what is worth reporting, model phrasing, and a verification harness that checks every number in the output against the computed value
+- [ ] **4. Headless and observable.** CLI, structured logging, run status recorded on success and failure
+- [ ] **5. Scheduled cloud run.** Terraform, container, scheduled trigger, alarms, keyless deploys
+- [ ] **6. API.** Service over the stored results
+- [ ] **7. Front end and drill-through.** From a bucket to the names behind it
